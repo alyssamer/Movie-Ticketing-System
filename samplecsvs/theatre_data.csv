@@ -1,0 +1,5 @@
+theatre_id,max_occupancy,is_3d,has_fancy_sound
+1,150,1,1
+2,100,1,0
+3,100,0,1
+4,80,0,0

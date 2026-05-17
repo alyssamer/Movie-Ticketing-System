@@ -1,0 +1,71 @@
+role_id,person_id,movie_id,role_type,character_name
+1,1,1,director,
+2,1,1,writer,
+3,2,1,actor,Kim Ki-taek
+4,3,1,actor,Park Dong-ik
+5,4,1,actor,Choi Yeon-gyo
+6,5,1,writer,
+7,6,1,producer,
+8,7,1,producer,
+9,8,2,director,
+10,8,2,writer,
+11,8,2,producer,
+12,9,2,actor,Bruce Wayne
+13,10,2,actor,Joker
+14,11,2,writer,
+15,12,2,producer,
+16,13,2,producer,
+17,14,3,director,
+18,15,3,actor,Tanjiro Kamado
+19,16,3,actor,Shinobu Kocho
+20,17,3,writer,
+21,18,3,writer,
+22,19,3,producer,
+23,20,4,director,
+24,20,4,writer,
+25,21,4,actor,Ponyo
+26,22,4,actor,Sosuke
+27,23,4,producer,
+28,24,5,actor,Cooper
+29,25,5,actor,Brand
+30,26,5,actor,Murph
+31,27,5,producer,
+32,28,6,director,
+33,28,6,writer,
+34,28,6,producer,
+35,29,6,director,
+36,29,6,producer,
+37,29,6,writer,
+38,30,6,actor,Evelyn Wang
+39,31,6,actor,Joy Wang
+40,32,6,actor,Waymond Wang
+41,33,6,producer,
+42,34,7,director,
+43,34,7,writer,
+44,35,7,actor,Johnny
+45,36,7,producer,
+46,37,7,producer,
+47,24,7,actor,Buster Moon
+48,38,8,director,
+49,39,8,actor,Sydney Prescott
+50,40,8,actor,Gale Weathers
+51,41,8,writer,
+52,42,8,producer,
+53,43,8,producer,
+54,44,9,director,
+55,45,9,actor,Mima Kirigoe
+56,46,9,actor,Rumi
+57,47,9,writer,
+58,48,9,producer,
+59,49,9,producer,
+60,50,10,director,
+61,51,10,actor,K 
+62,52,10,actor,Joi
+63,53,10,writer,
+64,54,10,producer,
+65,55,10,producer,
+66,56,10,producer,
+67,44,11,director,
+68,57,11,actor,Dr. Chiba Atsuko
+69,58,11,writer,
+70,58,11,producer,

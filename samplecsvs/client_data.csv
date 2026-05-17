@@ -1,0 +1,51 @@
+name,address,email,interests,reward_member,password
+John Smith,1234 N Clark St Chicago IL,john.smith1@gmail.com,Action movies,TRUE,John1#Act
+Emily Johnson,5678 W Madison St Chicago IL,emily.johnson2@gmail.com,Romantic comedies,FALSE,Emily2$Rom
+Michael Brown,9101 S Michigan Ave Chicago IL,michael.brown3@gmail.com,Sci-fi and fantasy,TRUE,Michael3!Sci
+Sarah Davis,2345 W Fullerton Ave Chicago IL,sarah.davis4@gmail.com,Horror,FALSE,Sarah4%Hor
+David Wilson,6789 N Western Ave Chicago IL,david.wilson5@gmail.com,Drama,TRUE,David5&Dra
+Jessica Martinez,3456 S Halsted St Chicago IL,jessica.martinez6@gmail.com,Animated films,FALSE,Jessica6*Ani
+Daniel Anderson,7890 W Irving Park Rd Chicago IL,daniel.anderson7@gmail.com,Documentaries,TRUE,Daniel7@Doc
+Ashley Taylor,4567 N Ashland Ave Chicago IL,ashley.taylor8@gmail.com,Thrillers,FALSE,Ashley8#Thr
+Matthew Thomas,8912 W Belmont Ave Chicago IL,matthew.thomas9@gmail.com,Action,TRUE,Matthew9$Act
+Amanda Hernandez,1235 S Pulaski Rd Chicago IL,amanda.hernandez10@gmail.com,Romance,FALSE,Amanda10!Rom
+Christopher Moore,5679 N Kedzie Ave Chicago IL,chris.moore11@gmail.com,Comedy,TRUE,Christopher11%Com
+Stephanie Martin,9102 W Diversey Ave Chicago IL,steph.martin12@gmail.com,Drama,FALSE,Stephanie12&Dra
+Joshua Jackson,2346 N Milwaukee Ave Chicago IL,josh.jackson13@gmail.com,Sci-fi,TRUE,Joshua13*Sci
+Megan Thompson,6780 W Addison St Chicago IL,megan.thompson14@gmail.com,Horror,FALSE,Megan14@Hor
+Andrew White,3457 N Cicero Ave Chicago IL,andrew.white15@gmail.com,Action,TRUE,Andrew15#Act
+Lauren Lopez,7891 S Western Ave Chicago IL,lauren.lopez16@gmail.com,Romance,FALSE,Lauren16$Rom
+Ryan Lee,4568 W Lawrence Ave Chicago IL,ryan.lee17@gmail.com,Fantasy,TRUE,Ryan17!Fan
+Rachel Gonzalez,8913 N Lincoln Ave Chicago IL,rachel.gonzalez18@gmail.com,Comedy,FALSE,Rachel18%Com
+Brandon Harris,1236 S State St Chicago IL,brandon.harris19@gmail.com,Action,TRUE,Brandon19&Act
+Nicole Clark,5670 W 63rd St Chicago IL,nicole.clark20@gmail.com,Drama,FALSE,Nicole20*Dra
+Justin Lewis,9103 N Broadway Chicago IL,justin.lewis21@gmail.com,Thriller,TRUE,Justin21@Thr
+Samantha Robinson,2347 W Chicago Ave Chicago IL,samantha.robinson22@gmail.com,Romance,FALSE,Samantha22#Rom
+Tyler Walker,6781 N Damen Ave Chicago IL,tyler.walker23@gmail.com,Sci-fi,TRUE,Tyler23$Sci
+Brittany Young,3458 W North Ave Chicago IL,brittany.young24@gmail.com,Horror,FALSE,Brittany24!Hor
+Kevin Allen,7892 S Cottage Grove Ave Chicago IL,kevin.allen25@gmail.com,Action,TRUE,Kevin25%Act
+Hannah King,4569 N Pulaski Rd Chicago IL,hannah.king26@gmail.com,Drama,FALSE,Hannah26&Dra
+Jason Wright,8914 W Grand Ave Chicago IL,jason.wright27@gmail.com,Comedy,TRUE,Jason27*Com
+Olivia Scott,1237 N State St Chicago IL,olivia.scott28@gmail.com,Romance,FALSE,Olivia28@Rom
+Zachary Green,5671 W Foster Ave Chicago IL,zach.green29@gmail.com,Fantasy,TRUE,Zachary29#Fan
+Victoria Adams,9104 N Sheridan Rd Chicago IL,victoria.adams30@gmail.com,Drama,FALSE,Victoria30$Dra
+Aaron Baker,2348 W Belmont Ave Chicago IL,aaron.baker31@gmail.com,Action,TRUE,Aaron31!Act
+Chloe Nelson,6782 N Clark St Chicago IL,chloe.nelson32@gmail.com,Horror,FALSE,Chloe32%Hor
+Nathan Carter,3459 W Madison St Chicago IL,nathan.carter33@gmail.com,Sci-fi,TRUE,Nathan33&Sci
+Grace Mitchell,7893 S Michigan Ave Chicago IL,grace.mitchell34@gmail.com,Romance,FALSE,Grace34*Rom
+Kyle Perez,4570 N Western Ave Chicago IL,kyle.perez35@gmail.com,Comedy,TRUE,Kyle35@Com
+Lily Roberts,8915 W Irving Park Rd Chicago IL,lily.roberts36@gmail.com,Drama,FALSE,Lily36#Dra
+Ethan Turner,1238 N Ashland Ave Chicago IL,ethan.turner37@gmail.com,Thriller,TRUE,Ethan37$Thr
+Ava Phillips,5672 W Belmont Ave Chicago IL,ava.phillips38@gmail.com,Romance,FALSE,Ava38!Rom
+Logan Campbell,9105 N Kedzie Ave Chicago IL,logan.campbell39@gmail.com,Action,TRUE,Logan39%Act
+Mia Parker,2349 W Diversey Ave Chicago IL,mia.parker40@gmail.com,Drama,FALSE,Mia40&Dra
+Caleb Evans,6783 N Milwaukee Ave Chicago IL,caleb.evans41@gmail.com,Sci-fi,TRUE,Caleb41*Sci
+Ella Edwards,3460 W Addison St Chicago IL,ella.edwards42@gmail.com,Comedy,FALSE,Ella42@Com
+Noah Collins,7894 S Halsted St Chicago IL,noah.collins43@gmail.com,Fantasy,TRUE,Noah43#Fan
+Abigail Stewart,4571 N Cicero Ave Chicago IL,abigail.stewart44@gmail.com,Horror,FALSE,Abigail44$Hor
+Liam Sanchez,8916 W Lawrence Ave Chicago IL,liam.sanchez45@gmail.com,Action,TRUE,Liam45!Act
+Sophia Morris,1239 N Lincoln Ave Chicago IL,sophia.morris46@gmail.com,Drama,FALSE,Sophia46%Dra
+Lucas Rogers,5673 W Chicago Ave Chicago IL,lucas.rogers47@gmail.com,Thriller,TRUE,Lucas47&Thr
+Isabella Reed,9106 N Damen Ave Chicago IL,isabella.reed48@gmail.com,Romance,FALSE,Isabella48*Rom
+Mason Cook,2350 W North Ave Chicago IL,mason.cook49@gmail.com,Comedy,TRUE,Mason49@Com
+Amelia Morgan,6784 N Broadway Chicago IL,amelia.morgan50@gmail.com,Drama,FALSE,Amelia50#Dra
