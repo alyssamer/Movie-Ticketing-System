@@ -1,8 +1,26 @@
 # Movie Ticketing System 
 
-A project for my course Database Systems. Allows the movie theater to keep track of screening schedules, ticket sales, clients, and certain analytics. The data can be seen using an administrative log-in, and an administrator can also add screenings. 
+Application for a movie theater that allows for the management of movie screenings, tickets, and viewing various analytics for clients and administrators.
 
-Redoing original TUI to a GUI in Python
+Clients
+- can register or log in 
+- search for movies by title, genre, or time
+- book tickets (with dynamic pricing)
+- manage payment methods
+
+Administrators
+- can log in
+- view remaining seat capacity
+- add new movie screenings
+- view revenue by movie
+- view avergae occupancy rate by theater
+
+
+
+## Running 
+- 
+-
+
 
 
 ## Files
