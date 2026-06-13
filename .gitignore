@@ -1,4 +1,7 @@
 # local
+
+__pycache__/
+
 .vscode/
 
 *.exe
