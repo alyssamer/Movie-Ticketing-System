@@ -13,7 +13,7 @@ Administrators
 - view remaining seat capacity
 - add new movie screenings
 - view revenue by movie
-- view avergae occupancy rate by theater
+- view average occupancy rate by theater
 
 
 
@@ -25,5 +25,7 @@ Administrators
 
 ## Files
 - ddlscript.sql - full ddl script
-- samplecsvs - several csv's with the sample data
-- ERmodel 
+- samplecsvs - csv's with the sample data for all tables
+- app.cpp - C++ code for the TUI application
+- ERmodel - image of the original ER model
+- README.md
