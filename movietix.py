@@ -13,11 +13,22 @@ def register_info(name_entry, email_entry, password_entry, interests, rewards, l
     name = name_entry.get()
     email = email_entry.get()
     password = password_entry.get()
-    interest = interests.get()
+    # get selected items, seperate w commas
+    selected_indices = interests.curselection()  
+    selected_interests = [interests.get(i) for i in selected_indices]  
+    interests_string = ",".join(selected_interests)  
     reward_info = rewards.get()
 
+    ### check not empty before insertion
+    if not name or not email or not password or not reward_info:
+        label.config(text = "please fill in all required fields")
+        return
+    
+    ### validity 
+   
+
     ### insert into database
-    registration = database.create_client_account(name, email, password, interest, reward_info)
+    registration = database.create_client_account(name, email, password, interests_string, reward_info)
 
     # if succees auto log in
     if registration:
@@ -32,7 +43,7 @@ def register_info(name_entry, email_entry, password_entry, interests, rewards, l
 ### register new client for the website
 def client_register_screen(root):
     register = tk.Toplevel(root)
-    register.geometry("400x250")
+    register.geometry("400x400")
     register.title("registration screen")
 
     ### close out registration page
@@ -40,21 +51,44 @@ def client_register_screen(root):
     close.pack()
 
     ### labels for users
-    email_text = tk.Label(register, text = "email")
-    pass_text = tk.Label(register, text = "password")
-
+    name_text = tk.Label(register, text = "name*")
+    email_text = tk.Label(register, text = "email*")
+    pass_text = tk.Label(register, text = "password*")
+    address_text = tk.Label(register, text = "address")
+    rewards_text = tk.Label(register, text = "want to be in our rewards program?*")
+    interests_text = tk.Label(register, text = "movie interests")
 
     ### user input
+    ### name, email, password, rewards required
+    ### address and interests optional
+    name_entry = tk.Entry(register)
     email_entry = tk.Entry(register)
     password_entry = tk.Entry(register)
+    address_entry = tk.Entry(register)
 
+    rewards_check = tk.Checkbutton(register, text = "yes", onvalue = "yes", offvalue = "no")
+
+    ### able to choose multiple interests
+    interest_list = tk.Listbox(register, height = 40, selectmode=tk.MULTIPLE)
+    interest_list.insert(tk.END, "Action")
+    interest_list.insert(tk.END, "Family")
+    interest_list.insert(tk.END, "Thriller")
+    interest_list.insert(tk.END, "Horror")
+    interest_list.insert(tk.END, "Sci-Fi")
 
     ### pack in order
+    name_text.pack()
+    name_entry.pack()
     email_text.pack()
-    pass_text.pack()
-
     email_entry.pack()
+    pass_text.pack()
     password_entry.pack()
+    address_text.pack()
+    address_entry.pack()
+    rewards_text.pack()
+    rewards_check.pack()
+    interests_text.pack()
+    interest_list.pack()
 
     ### label for login validity information
     label = tk.Label(register, text = "") 
@@ -62,7 +96,8 @@ def client_register_screen(root):
     
     ### goes to registration func submits to databse
     register_button = tk.Button(register, text = "Login", 
-                          command = lambda: register_info(email_entry, password_entry, label),
+                          command = lambda: register_info(name_entry, email_entry, password_entry, 
+                                                          interest_list, rewards_check, label),
                           width=15, height=2, bg="#859bc4")
     register_button.pack()
 
@@ -84,16 +119,44 @@ def login_info(root, email_entry, password_entry, label, user):
 
     ### change label
     if valid_user:
+        root.logged_in_user = email
+        root.user_type = user
+
         if user == "client":
+            show_user_info(root, user)
             label.config(text = "successful login")
             load_movies(root)
         else:
+            show_user_info(root, user)
             label.config(text = "successful admin login")
             load_admin_dashboard(root)
     else:
         label.config(text = "email or password is incorrect")
     
     return
+
+
+### remove buttns, replace with user info
+def show_user_info(root, user):
+    root.button_frame.place_forget()  # hide the login/register buttons
+    
+    ### create user info frame
+    user_frame = tk.Frame(root, bg="#060c28")
+    root.user_info_frame = user_frame
+    user_frame.place(x=900, y=42)
+    
+    # user email
+    email_label = tk.Label(user_frame, text=f"{root.logged_in_user}", 
+                          fg="#d9e4f7", bg="#060c28", font=("Arial", 10))
+    email_label.pack()
+    
+    # clients have num movies at the end
+    if user == "client":
+        # num movies watched
+        movies_watched = database.get_movies_watched(root.logged_in_user)
+        watched_label = tk.Label(user_frame, text=f"Movies: {movies_watched}/10", 
+                                fg="#d9e4f7", bg="#060c28", font=("Arial", 9))
+        watched_label.pack()
 
 
 ### user login input
@@ -138,7 +201,7 @@ def client_login_screen(root):
     return 
 
 
-
+## admin login input
 def admin_login_screen(root):
     ### window
     admin_login = tk.Toplevel(root)
@@ -177,8 +240,9 @@ def admin_login_screen(root):
     return 
 
 
+
 ###############################################
-######### load current movies
+######### load current movies screen 
 
 def load_movies(root):
     ### currently showing movies from database
@@ -191,7 +255,7 @@ def load_movies(root):
     ### frame to hold them
     movies_frame = tk.Frame(root, background = "#859bc4")
     root.movies_frame = movies_frame
-    movies_frame.place(x = 200, y = 180, width = 800, height = 480)
+    movies_frame.place(x = 200, y = 140, width = 800, height = 500)
 
     ### vertical scrolling
     canvas = tk.Canvas(movies_frame, background = "#859bc4", highlightthickness = 0)
@@ -217,7 +281,7 @@ def load_movies(root):
     return
 
 
-### creates movie "card" 
+### creates movie "card" in scroll list
 def movie_card(scroll, movie_id, title, release_date, root):
     ### image on the left, title and times on the right
     card = tk.Frame(scroll, height = 150, bg = "#859bc4", highlightthickness = 0)
@@ -227,11 +291,11 @@ def movie_card(scroll, movie_id, title, release_date, root):
     image_filename = title + ".jpg"
 
     try:
-        img = Image.open(f"images/{image_filename}").resize((170, 225))
+        img = Image.open(f"images/{image_filename}").resize((190, 250))
         photo = ImageTk.PhotoImage(img)
         img_label = tk.Label(card, image = photo)
         img_label.image = photo
-        img_label.pack(side = "left", padx = 15, pady = 15)
+        img_label.pack(side = "left", padx = 20, pady = 15)
 
     except: # default if no image avail
         img_label = tk.Label(card, text = "no poster!", background = "#859bc4")
@@ -239,32 +303,76 @@ def movie_card(scroll, movie_id, title, release_date, root):
 
     ##### right side 
     right_frame = tk.Frame(card, background = "#859bc4")
-    right_frame.pack(side = "left", fill = "both", expand = True)
+    right_frame.pack(side = "left", fill = "both", padx = 20, expand = True)
 
     ### title and showing times
-    title_label = tk.Label(right_frame, text = title, font = ("Arial", 12), fg = "#d9e4f7", background = "#859bc4")
-    title_label.pack()
+    title_label = tk.Label(right_frame, text = title, font = ("Arial", 18, "bold"), fg = "#d9e4f7", background = "#859bc4")
+    title_label.pack(pady = 15)
 
-    # showtimes_frame = tk.Frame(right_frame)
-    # showtimes_frame.pack()
+    showtimes_frame = tk.Frame(right_frame)
+    showtimes_frame.pack(pady = 10)
+
+    ### showtimes for movie for example date
+    showtime = database.get_showtimes(movie_id, date ='2026-05-12')
+
+    for data in showtime:
+        screening_id, theater_id, date, time = data
+
+        time_formatted = str(time)[:5]  # takes first 5 chars: "14:30"
+    
+        time_button = tk.Button(showtimes_frame, text = time_formatted, bg = "#859bc4", width = 10, height = 2, padx = 10, pady = 10,
+                                command = lambda s = screening_id, th = theater_id, d = date, t = time: booking_screen(root, movie_id, s, th, d, t))
+        time_button.pack(side = "left", padx = 5, pady = 5)
 
     return
 
 
 
+
 ###############################################
-######### load administration dashboard
+#########  booking tickets screen
+
+def booking_screen(root, movie_id,screening_id, theater_id, date, time):
+    ### remove existing screen
+    if hasattr(root, 'movies_frame') and root.movies_frame:
+        root.movies_frame.destroy()
+
+    booking_frame = tk.Frame(root, background="#859bc4")
+    root.booking_frame = booking_frame
+    booking_frame.place(x = 200, y = 140, width = 800, height = 500) 
+    
+
+    ### movie title - date, time - theater
+    title = database.get_movie_title(movie_id)
+    title_label = tk.Label(booking_frame, text = title, font = ("Arial", 14), bg = "#859bc4", fg = "#d9e4f7")
+    title_label.pack(pady = 20)
+
+    ### choose or add payment method
+    payment_label = tk.Label(booking_frame, text = "Choose Payment Method:", font = ("Arial", 12), bg = "#859bc4", fg = "#d9e4f7")
+    payment_label.pack(pady = 10)
+
+    ### choose number of tickets
+    tickets_label = tk.Label(booking_frame, text = "Number of Tickets:", font = ("Arial", 12), bg = "#859bc4", fg = "#d9e4f7")
+    tickets_label.pack(pady = 10)
+
+    return
+
+
+
+
+###############################################
+######### load administration dashboard screen
 
 def load_admin_dashboard(root):
 
     # destroy admin frame if it exists
     if hasattr(root, 'movies_frame') and root.movies_frame:
         root.movies_frame.destroy()
-        
+
     admin_frame = tk.Frame(root, background="#859bc4")
     root.admin_frame = admin_frame
-    admin_frame.place(x=200, y=180, width=800, height=400)
-    
+    admin_frame.place(x = 200, y = 1840, width = 800, height = 500)
+
     # top text
     title = tk.Label(admin_frame, text="Admin Dashboard", font=("Arial", 16, "bold"),
                      bg="#859bc4", fg="#d9e4f7")
@@ -286,7 +394,7 @@ def load_admin_dashboard(root):
     return
 
 
-### 
+### sends to database
 def delete_button(root, email_entry):
     email = email_entry.get()
     database.delete_client_account(email)
@@ -426,6 +534,7 @@ def main():
 
     # buttons
     button_frame = tk.Frame(master = root, relief = "raised", background = "#060c28")
+    root.button_frame = button_frame
     button_frame.place(x = 900, y = 42)
     register = tk.Button(master = button_frame, text = "register", font = ("Arial", 12, "bold"), command = lambda: client_register_screen(root),
                       width = 12, height = 2, background = "#859bc4", fg = "#d9e4f7")

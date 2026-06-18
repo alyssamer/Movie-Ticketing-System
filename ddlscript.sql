@@ -4,11 +4,12 @@
 
 -- client_data.csv -> name, address, email, password, interests, reward_member
 CREATE TABLE client (
-    name          VARCHAR(255) NOT NULL,
-    address       VARCHAR(255),
-    email         VARCHAR(255) PRIMARY KEY,
-    interests     VARCHAR(255),
-    reward_member BOOLEAN NOT NULL DEFAULT FALSE,
+    name           VARCHAR(255) NOT NULL,
+    address        VARCHAR(255),
+    email          VARCHAR(255) PRIMARY KEY,
+    interests      VARCHAR(255),
+    reward_member  BOOLEAN NOT NULL DEFAULT FALSE,
+	movies_watched INTEGER DEFAULT NULL,
     password      VARCHAR(255) NOT NULL
 );
 

@@ -62,14 +62,43 @@ def get_available_movies():
 
     now = datetime.now()
     curr_date = now.date()
-    cursor.execute("SELECT DISTINCT movie_id, title, release_date FROM movies NATURAL JOIN screening_schedule WHERE date = '2026-05-01'")
+    cursor.execute("SELECT DISTINCT movie_id, title, release_date FROM movies NATURAL JOIN screening_schedule WHERE date = '2026-05-12'")
 
     movies = cursor.fetchall()
     cursor.close()
     conn.close()
     return movies
 
+### movies watched for rewards program
+def get_movies_watched(email):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT movies_watched FROM client WHERE email = %s", (email,))
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return result[0] if result else 0
 
+### movie title for booking screen
+def get_movie_title(movie_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT title FROM movies WHERE movie_id = %s", (movie_id,))
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return result[0] if result else "Unknown Movie"
+
+
+def get_showtimes(movie_id, date): ### placeholder date in python code
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""SELECT screening_id, theater_id, date, time FROM screening_schedule 
+                      WHERE movie_id = %s AND date = %s""", (movie_id, date))
+    showtimes = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return showtimes
 
 ###############################################
 ######### admin functions #########
