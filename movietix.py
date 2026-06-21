@@ -337,27 +337,151 @@ def booking_screen(root, movie_id,screening_id, theater_id, date, time):
     if hasattr(root, 'movies_frame') and root.movies_frame:
         root.movies_frame.destroy()
 
+    ### must be logged in to book tickets
+    if not hasattr(root, 'logged_in_user'):
+        tk.messagebox.showerror("Error", "Please log in first")
+        load_movies(root)
+        return
+
     booking_frame = tk.Frame(root, background="#859bc4")
     root.booking_frame = booking_frame
     booking_frame.place(x = 200, y = 140, width = 800, height = 500) 
     
 
-    ### movie title - date, time - theater
+
+    ### back button to movies
+    back_button = tk.Button(booking_frame, text = "back to movies", command = lambda: load_movies(root), bg = "#859bc4")
+    back_button.grid(row=0, column=0, padx=10, pady=10)
+
+    ### movie title - date, time 
     title = database.get_movie_title(movie_id)
-    title_label = tk.Label(booking_frame, text = title, font = ("Arial", 14), bg = "#859bc4", fg = "#d9e4f7")
-    title_label.pack(pady = 20)
+    title_label = tk.Label(booking_frame, text = title, font = ("Arial", 18, "bold"), bg = "#859bc4", fg = "#d9e4f7")
+    title_label.grid(row=0, column=1, padx=10, pady=10)
+
+    ### screening info  
+    info_text = f"Date: {date}    Time: {str(time)[:5]}    Theater: {theater_id}"
+    info_label = tk.Label(booking_frame, text = info_text, font = ("Arial", 12), bg = "#859bc4", fg = "#d9e4f7")
+    info_label.grid(row=0, column=2, padx=10, pady=10)
+
+
 
     ### choose or add payment method
+    payment_methods = database.get_payment_methods(root.logged_in_user)
+    card_list = [method[0] for method in payment_methods]  # extract card numbers from tuples
+
     payment_label = tk.Label(booking_frame, text = "Choose Payment Method:", font = ("Arial", 12), bg = "#859bc4", fg = "#d9e4f7")
-    payment_label.pack(pady = 10)
+    payment_label.grid(row = 1, column = 1, padx=10, pady=10)
+
+    payment_var = tk.StringVar(value = card_list[0] if card_list else "")  # default to first card if exists
+
+
+    if card_list:
+        for i, card in enumerate(card_list): ### goes thru list of cards 
+            card_button = tk.Radiobutton(booking_frame, text=f"Card ending in {card[-4:]}", variable=payment_var, value=card, 
+                             bg="#859bc4", fg="#d9e4f7")
+            card_button.grid(row=2+i, column=0, columnspan=2, sticky="w", padx=40, pady=5)
+    else:
+        no_card_label = tk.Label(booking_frame, text = "No payment methods saved. Please add a card.", bg = "#859bc4", fg = "#d9e4f7")
+        no_card_label.grid(row = 2, column=2, padx=10, pady=5)
+
+    ### add card button
+    add_card_button = tk.Button(booking_frame, text = "Add Payment Method", bg = "#859bc4", width = 20, 
+                                command = lambda: add_card_popup(root, root.logged_in_user))
+    add_card_button.grid(row = 4, column = 1, pady = 10)
+
 
     ### choose number of tickets
     tickets_label = tk.Label(booking_frame, text = "Number of Tickets:", font = ("Arial", 12), bg = "#859bc4", fg = "#d9e4f7")
-    tickets_label.pack(pady = 10)
+    tickets_label.grid(row = 5, column = 1, pady = 10)
+
+    tickets_select = tk.Spinbox(booking_frame, from_= 1, to = 10, width = 5)
+    tickets_select.grid(row = 5, column = 2, pady = 10)
+
+    ### price for tickets
+    price = database.calculate_ticket_price(screening_id, theater_id)
+    price_label = tk.Label(booking_frame, text = f"Price per Ticket: ${price:.2f}", font = ("Arial", 12), bg = "#859bc4", fg = "#d9e4f7")
+    price_label.grid(row = 6, column = 1, pady = 10)
+
+    ### label if not successful booking
+    booking_label = tk.Label(booking_frame, text = "", font = ("Arial", 12), bg = "#859bc4", fg = "#d9e4f7")
+    booking_label.grid(row = 7, column = 1, pady = 10)
+
+    ### confirm booking button
+    confirm_button = tk.Button(booking_frame, text = "Confirm Booking", bg = "#859bc4", width = 15, height = 2,
+                                command = lambda: confirm_booking(root, tickets_select.get(), price, root.logged_in_user, payment_var.get(), screening_id, booking_label))
+    confirm_button.grid(row = 8, column = 1, pady = 20)
 
     return
 
 
+
+### add credit or debit card to payment methods
+def add_card_popup(root, email):
+    card_window = tk.Toplevel(root)
+    card_window.geometry("400x250")
+    card_window.title("Add Payment Method")
+
+    ### card type 
+    card_type_label = tk.Label(card_window, text = "*Card Type: ", font = ("Arial", 12))
+    card_type_label.pack(pady = 10)
+
+    card_type_var = tk.StringVar()
+    card_type_dropdown = tk.OptionMenu(card_window, card_type_var, "Credit", "Debit")
+    card_type_dropdown.pack(pady = 10)
+
+    ### card number
+    card_label = tk.Label(card_window, text = "*Card Number: ", font = ("Arial", 12))
+    card_label.pack(pady = 10)
+    
+    card_entry = tk.Entry(card_window, width=30)
+    card_entry.pack(pady=10)
+
+    ### billing address
+    address_label = tk.Label(card_window, text = "Billing Address: ", font = ("Arial", 12))
+    address_label.pack(pady = 10)
+    address_entry = tk.Entry(card_window, width=30)
+    address_entry.pack(pady=10)
+
+    ### label for card saving status
+    card_status_label = tk.Label(card_window, text = "", font = ("Arial", 12), bg = "#859bc4", fg = "#d9e4f7")
+    card_status_label.pack(pady = 10)
+
+    ### save card button
+    save_button = tk.Button(card_window, text = "Save Card", bg = "#859bc4", width = 15, height = 2,
+                             command = lambda: save_card(card_window, email, card_entry, card_status_label))
+    save_button.pack(pady = 20)
+
+
+### save card to database
+def save_card(card_window, email, card_entry, card_status_label):
+    card_num = card_entry.get()
+    
+    if len(card_num) < 4:
+        card_status_label.config(text = "Invalid card number")
+        return
+        
+    if database.add_payment_method(email, card_num):
+        card_status_label.config(text = "Card added successfully!")
+    else:
+        card_status_label.config(text = "Failed to add card")
+    
+
+
+
+### confirm booking and insSert into database
+def confirm_booking(root, num_tickets, price, email, card_number, screening_id, booking_label):
+    email = root.logged_in_user
+    total_price = float(num_tickets) * price
+
+    if not card_number:
+        booking_label.config(text="Please select a payment method", fg="#FF6B6B")
+        return
+
+    if database.book_ticket(num_tickets, total_price, email, card_number, screening_id):
+        booking_label.config(text = "Booking confirmed!")
+        root.after(1500, lambda: load_movies(root)) # return to movies after 1.5 seconds!
+    else:
+        booking_label.config(text = "Failed to book tickets")
 
 
 ###############################################
@@ -371,7 +495,7 @@ def load_admin_dashboard(root):
 
     admin_frame = tk.Frame(root, background="#859bc4")
     root.admin_frame = admin_frame
-    admin_frame.place(x = 200, y = 1840, width = 800, height = 500)
+    admin_frame.place(x = 200, y = 140, width = 800, height = 500)
 
     # top text
     title = tk.Label(admin_frame, text="Admin Dashboard", font=("Arial", 16, "bold"),

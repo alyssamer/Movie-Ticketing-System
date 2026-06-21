@@ -1,5 +1,6 @@
 import psycopg2
 from datetime import datetime
+from tkinter import messagebox
 
 def get_connection():
     return psycopg2.connect(
@@ -52,6 +53,32 @@ def check_admin_login(email, password):
     return valid
 
 
+### payment method functions
+def add_payment_method(email, card_number):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO payment_method (email, card_number) 
+            VALUES (%s, %s)""", (email, card_number))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"error: {e}")
+        return False
+    
+
+def get_payment_methods(email):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT card_number FROM payment_method WHERE client_email = %s", (email,))
+    methods = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return methods
+
 ###############################################
 #########  client functions #########
 
@@ -79,6 +106,21 @@ def get_movies_watched(email):
     conn.close()
     return result[0] if result else 0
 
+# times for movie
+def get_showtimes(movie_id, date): ### placeholder date in python code
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""SELECT screening_id, theater_id, date, time FROM screening_schedule 
+                   WHERE movie_id = %s AND date = %s""", (movie_id, date))
+    showtimes = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return showtimes
+
+
+
+###### booking screen functions ######
+
 ### movie title for booking screen
 def get_movie_title(movie_id):
     conn = get_connection()
@@ -89,16 +131,54 @@ def get_movie_title(movie_id):
     conn.close()
     return result[0] if result else "Unknown Movie"
 
-
-def get_showtimes(movie_id, date): ### placeholder date in python code
+### theater information for tickets
+def get_theater_info(theater_id):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("""SELECT screening_id, theater_id, date, time FROM screening_schedule 
-                      WHERE movie_id = %s AND date = %s""", (movie_id, date))
-    showtimes = cursor.fetchall()
+    cursor.execute("""SELECT is_major_studio, release_date, is_3d, has_fancy_sound FROM movies JOIN screening_schedule JOIN theater 
+                   WHERE theater_id = %s""", (theater_id,))
+    result = cursor.fetchone()
     cursor.close()
     conn.close()
-    return showtimes
+    return result if result else (False, False, False)
+
+### calculate ticket price
+def calculate_ticket_price(screening_id, theater_id):
+    base_price = 15.00
+    
+    # Get theater info
+    is_major_studio, release_date, is_3d, has_fancy_sound = get_theater_info(theater_id)
+    
+    price = base_price
+    if is_3d:
+        price += 5.00
+    if has_fancy_sound:
+        price += 3.00
+    if is_major_studio:
+        price += 2.00
+
+    ### discount for older movies
+    
+    return price
+
+### insert client ticket sale
+def book_ticket(num_tickets, price, email, card_number, screening_id):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+  
+        cursor.execute("""
+            INSERT INTO ticket_sales (num_tickets, price, email, card_number, screening_id) 
+            VALUES (%s, %s, %s, %s, %s)""", (num_tickets, price, email, card_number, screening_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"error: {e}")
+        return False
+
+
 
 ###############################################
 ######### admin functions #########
