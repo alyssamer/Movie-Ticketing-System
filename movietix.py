@@ -332,7 +332,7 @@ def movie_card(scroll, movie_id, title, release_date, root):
 ###############################################
 #########  booking tickets screen
 
-def booking_screen(root, movie_id,screening_id, theater_id, date, time):
+def booking_screen(root, movie_id, screening_id, theater_id, date, time):
     ### remove existing screen
     if hasattr(root, 'movies_frame') and root.movies_frame:
         root.movies_frame.destroy()
@@ -398,7 +398,7 @@ def booking_screen(root, movie_id,screening_id, theater_id, date, time):
     tickets_select.grid(row = 5, column = 2, pady = 10)
 
     ### price for tickets
-    price = database.calculate_ticket_price(screening_id, theater_id)
+    price = database.calculate_ticket_price(screening_id, movie_id, theater_id)
     price_label = tk.Label(booking_frame, text = f"Price per Ticket: ${price:.2f}", font = ("Arial", 12), bg = "#859bc4", fg = "#d9e4f7")
     price_label.grid(row = 6, column = 1, pady = 10)
 
@@ -479,6 +479,11 @@ def confirm_booking(root, num_tickets, price, email, card_number, screening_id, 
 
     if database.book_ticket(num_tickets, total_price, email, card_number, screening_id):
         booking_label.config(text = "Booking confirmed!")
+        ### refresh user info with new num movies watched?
+        if hasattr(root, 'user_info_frame') and root.user_info_frame:
+            root.user_info_frame.destroy()
+        show_user_info(root, root.user_type)
+
         root.after(1500, lambda: load_movies(root)) # return to movies after 1.5 seconds!
     else:
         booking_label.config(text = "Failed to book tickets")

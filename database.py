@@ -135,19 +135,38 @@ def get_movie_title(movie_id):
 def get_theater_info(theater_id):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("""SELECT is_major_studio, release_date, is_3d, has_fancy_sound FROM movies JOIN screening_schedule JOIN theater 
-                   WHERE theater_id = %s""", (theater_id,))
+    cursor.execute("""
+        SELECT is_3d, has_fancy_sound 
+        FROM theater 
+        WHERE theater_id = %s
+    """, (theater_id,))
     result = cursor.fetchone()
     cursor.close()
     conn.close()
-    return result if result else (False, False, False)
+    return result if result else (False, False)
+
+### movie information for ticket price calculation
+def get_movie_info(movie_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT is_major_studio, release_date 
+        FROM movies 
+        WHERE movie_id = %s
+    """, (movie_id,))
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return result if result else (False, None)
+
 
 ### calculate ticket price
-def calculate_ticket_price(screening_id, theater_id):
+def calculate_ticket_price(screening_id, movie_id, theater_id):
     base_price = 15.00
     
-    # Get theater info
-    is_major_studio, release_date, is_3d, has_fancy_sound = get_theater_info(theater_id)
+    #  info
+    is_3d, has_fancy_sound = get_theater_info(theater_id)
+    is_major_studio, release_date = get_movie_info(movie_id)
     
     price = base_price
     if is_3d:
@@ -168,8 +187,17 @@ def book_ticket(num_tickets, price, email, card_number, screening_id):
         cursor = conn.cursor()
   
         cursor.execute("""
-            INSERT INTO ticket_sales (num_tickets, price, email, card_number, screening_id) 
+            INSERT INTO ticket_sales (quantity_sold, ticket_price, client_email, card_number, screening_id) 
             VALUES (%s, %s, %s, %s, %s)""", (num_tickets, price, email, card_number, screening_id))
+        
+        ### increment movies watched for rewards program! 
+        ### later keep track of specific movies watched for personalized recs
+        cursor.execute("""
+            UPDATE client 
+            SET movies_watched = movies_watched + %s 
+            WHERE email = %s
+        """, (num_tickets, email))
+
         conn.commit()
         cursor.close()
         conn.close()
