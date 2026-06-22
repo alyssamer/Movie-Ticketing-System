@@ -131,6 +131,7 @@ def get_movie_title(movie_id):
     conn.close()
     return result[0] if result else "Unknown Movie"
 
+
 ### theater information for tickets
 def get_theater_info(theater_id):
     conn = get_connection()
@@ -185,7 +186,6 @@ def book_ticket(num_tickets, price, email, card_number, screening_id):
     try:
         conn = get_connection()
         cursor = conn.cursor()
-  
         cursor.execute("""
             INSERT INTO ticket_sales (quantity_sold, ticket_price, client_email, card_number, screening_id) 
             VALUES (%s, %s, %s, %s, %s)""", (num_tickets, price, email, card_number, screening_id))
@@ -194,7 +194,7 @@ def book_ticket(num_tickets, price, email, card_number, screening_id):
         ### later keep track of specific movies watched for personalized recs
         cursor.execute("""
             UPDATE client 
-            SET movies_watched = movies_watched + %s 
+            SET movies_watched = movies_watched + 1
             WHERE email = %s
         """, (num_tickets, email))
 
@@ -210,6 +210,16 @@ def book_ticket(num_tickets, price, email, card_number, screening_id):
 
 ###############################################
 ######### admin functions #########
+
+### get movie id from title for adding screening
+def get_movie_id(title):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT movie_id FROM movies WHERE title = %s", (title,))
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return result[0] if result else None
 
 ### add a movie screening to the schedule
 def add_movie_screening(movie_id, date, time, theater):
@@ -245,12 +255,46 @@ def delete_client_account(email):
 
 ###### various analytics functions for admin dashboard ######
 
+### get all screenings for a day
+def get_screenings_by_day(date = "2026-05-12"): ### placeholder date 
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT screening_id, movie_id, theater_id, time 
+        FROM screening_schedule 
+        WHERE date = %s """, (date,))
+    screenings = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return screenings
+
 ### view remaining seat capacity for a screening
 def get_seat_capacity(screening_id):
     conn = get_connection()
     cursor = conn.cursor()
+    ### get the theater for the screening
+    cursor.execute("""
+        SELECT theater_id FROM screening_schedule WHERE screening_id = %s """, (screening_id,))
+    result = cursor.fetchone()
 
-    return 
+    ### get capacity for that theater and tickets sold
+    theater_id = result[0]
+    cursor.execute("""
+        SELECT max_occupancy FROM theater WHERE theater_id = %s """, (theater_id,))
+    capacity_result = cursor.fetchone()
+
+    if capacity_result:
+        capacity = capacity_result[0]
+        cursor.execute("""
+            SELECT SUM(quantity_sold) FROM ticket_sales WHERE screening_id = %s """, (screening_id,))
+        sold_result = cursor.fetchone()
+        sold = sold_result[0] if sold_result[0] else 0
+
+        remaining_capacity = capacity - sold
+
+    cursor.close()
+    conn.close()
+    return remaining_capacity
 
 ### revenue grouped by movie
 def get_revenue_by_movie():

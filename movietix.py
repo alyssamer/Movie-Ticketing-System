@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import *
 from PIL import Image, ImageTk
+from httpx import options
 import database
 
 
@@ -476,6 +477,10 @@ def confirm_booking(root, num_tickets, price, email, card_number, screening_id, 
     if not card_number:
         booking_label.config(text="Please select a payment method", fg="#FF6B6B")
         return
+    
+    if num_tickets > 10 or num_tickets == 0:
+        booking_label.config(text="Select valid ticket number", fg="#FF6B6B")
+        return
 
     if database.book_ticket(num_tickets, total_price, email, card_number, screening_id):
         booking_label.config(text = "Booking confirmed!")
@@ -494,7 +499,7 @@ def confirm_booking(root, num_tickets, price, email, card_number, screening_id, 
 
 def load_admin_dashboard(root):
 
-    # destroy admin frame if it exists
+    # destroy movie frame if it exists
     if hasattr(root, 'movies_frame') and root.movies_frame:
         root.movies_frame.destroy()
 
@@ -502,31 +507,49 @@ def load_admin_dashboard(root):
     root.admin_frame = admin_frame
     admin_frame.place(x = 200, y = 140, width = 800, height = 500)
 
+    ### top spacers
+    top_spacer = tk.Label(admin_frame, height = 3, bg = "#859bc4")
+    top_spacer.grid(row = 0, column = 1)
+
+    ### left spacers
+    left_spacer = tk.Label(admin_frame, width = 10, bg = "#859bc4")
+    left_spacer.grid(row = 0, column = 0)
+
+
+
     # top text
-    title = tk.Label(admin_frame, text="Admin Dashboard", font=("Arial", 16, "bold"),
-                     bg="#859bc4", fg="#d9e4f7")
-    title.pack(pady = 20)
+    title = tk.Label(admin_frame, text="Admin Dashboard", font=("Arial", 20, "bold"), bg="#859bc4", fg="#d9e4f7")
+    title.grid(row = 0, column = 2, padx = 10, pady = 15)
 
     ### buttons for admin functions
     add_movie_button = tk.Button(admin_frame, text = "Add Movie", width=20, command = lambda: admin_screening(root))
-    add_movie_button.pack(pady = 10)
+    add_movie_button.grid(row = 1, column = 1, padx = 10, pady = 10)
     delete_account_button = tk.Button(admin_frame, text = "Delete Customer Account", width = 20, command = lambda: delete_account_screen(root))
-    delete_account_button.pack(pady = 10)
+    delete_account_button.grid(row = 2, column = 1, padx = 10, pady = 10)
 
 
     ### view analytics - revenue, remaining capacity, average occupancy 
+    view_capacity_button = tk.Button(admin_frame, text = "View Remaining Seat Capacity", width = 30, command = lambda: view_seat_capacity(root))
+    view_capacity_button.grid(row = 1, column = 3, padx = 10)
 
-
-    view_analytics_button = tk.Button(admin_frame, text = "View Analytics", width = 20, command = lambda: view_analytics(root))
-    view_analytics_button.pack(pady = 10)
+    view_revenue_button = tk.Button(admin_frame, text = "View Revenue", width = 20, command = lambda: view_revenue(root))
+    view_revenue_button.grid(row = 2, column = 3, padx = 10, pady = 10)
 
     return
 
 
 ### sends to database
-def delete_button(root, email_entry):
+def delete_button(root, email_entry, label):
     email = email_entry.get()
+
+    ## check valid email formatkinda
+    if "@" not in email or "." not in email:
+        label.config(text = "Please enter a valid email address.")
+        return
+
+    ### check for existing email later
     database.delete_client_account(email)
+    label.config(text="Account deleted successfully!")
     return
 
 
@@ -536,12 +559,12 @@ def delete_account_screen(root):
     delete_account.geometry("400x250")
     delete_account.title("delete customer account")
 
-    ### close out registration page
+    ### close out page
     close = tk.Button(delete_account, text = "close", command = delete_account.destroy)
     close.pack()
 
     ### labels for users
-    email_text = tk.Label(delete_account, text = "email of account to delete")
+    email_text = tk.Label(delete_account, text = "Account Email*")
     email_text.pack()
 
     ### user input
@@ -554,7 +577,7 @@ def delete_account_screen(root):
     
     ### goes to func submits to databse
     delete_button = tk.Button(delete_account, text = "Delete Account", 
-                          command = lambda: delete_button(root, email_entry),
+                          command = lambda: delete_button(root, email_entry, label),
                           width=15, height=2, bg="#859bc4")
     delete_button.pack()
 
@@ -564,15 +587,35 @@ def delete_account_screen(root):
 
 
 ### send to database to add movie screening
-def add_movie_screening(root, title_entry, date_entry, time_entry, theatre_entry):
+def add_movie_screening(root, title_entry, date_entry, time_entry, theater_entry, valid_label):
     title = title_entry.get()
     date = date_entry.get()
     time = time_entry.get()
-    theatre = theatre_entry.get()
+    theater = theater_entry.get()
+
+    ### check valid entry
+    if not title or not date or not time or not theater:
+        valid_label.config(text="Please fill in all fields.")
+        return
+
+    ### check valid movie title
+    movie_id = database.get_movie_id(title)
+    if not movie_id:
+        valid_label.config(text="Invalid movie title.")
+        return
+    
+    ### check valid theater number
+    if not theater.isdigit() or int(theater) < 1 or int(theater) > 4:
+        valid_label.config(text="Please enter a valid theater number (1-4).")
+        return
+    
+    ### check valid date and time format
+    
 
     # add to database
-    database.add_movie_screening(title, date, time, theatre)
+    database.add_movie_screening(title, date, time, theater)
 
+    valid_label.config(text="Screening added successfully!")
     return
 
 
@@ -592,7 +635,7 @@ def admin_screening(root):
     title_entry = tk.Entry(add_movie)
     title_entry.pack()
 
-    theater_label = tk.Label(add_movie, text = "Theater:")
+    theater_label = tk.Label(add_movie, text = "Theater (1-4):")
     theater_label.pack()
     theater_entry = tk.Entry(add_movie)
     theater_entry.pack()
@@ -608,25 +651,91 @@ def admin_screening(root):
     time_entry = tk.Entry(add_movie)
     time_entry.pack()
 
+    ### valid label
+    valid_label = tk.Label(add_movie, text = "", font = ("Arial", 12), bg = "#859bc4", fg = "#d9e4f7")
+    valid_label.pack(pady = 10)
+
+    # submit button
+    submit_button = tk.Button(add_movie, text = "Add Screening", bg = "#859bc4", width = 15, height = 2,
+                              command = lambda: add_movie_screening(root, title_entry, date_entry, time_entry, theater_entry, valid_label))
+    submit_button.pack(pady = 20)
+
     return
 
 
 
-
-### view various analytics about movie sales and customers
-def view_analytics(root):
-    analytics = tk.Toplevel(root)
-    analytics.geometry("600x450")
-    analytics.title("Analytics")
+### view remaining seats for every screening
+def view_seat_capacity(root):
+    capacity_window = tk.Toplevel(root)
+    capacity_window.geometry("400x300")
+    capacity_window.title("Remaining Seat Capacity")
 
     # close button
-    close = tk.Button(analytics, text = "close", command = analytics.destroy)
+    close = tk.Button(capacity_window, text = "close", command = capacity_window.destroy)
     close.pack()
 
+    ### dropdown to choose screening
+    options = database.get_screenings_by_day()  # get all screenings for the day from database
+    screening_display = [f"Movie {s[1]} - Theater {s[2]} at {s[3]}" for s in options]
+    
+    screening_choice = tk.StringVar()
+    screening_choice.set(screening_display[0] if screening_display else "")
+    
+    ### label to display remaining capacity
+    capacity_label = tk.Label(capacity_window, text="", font=("Arial", 12))
+    capacity_label.pack(pady=10)
 
-    # placeholder for now
-    placeholder = tk.Label(analytics, text = "analytics coming soon!", font = ("Arial", 14), bg = "#859bc4", fg = "#d9e4f7")
-    placeholder.pack(pady = 20)
+    ### when screening selected, show remaining capacity
+    def on_screening_select(*args):
+        selected = screening_choice.get()
+        index = screening_display.index(selected)
+        screening_id = options[index][0]
+        remaining = database.get_seat_capacity(screening_id)
+        capacity_label.config(text=f"Remaining Capacity: {remaining} seats")
+    
+    ### dropdown does on_screening_select when changed
+    screening_choice.trace_add("write", on_screening_select)
+
+    screening_dropdown = tk.OptionMenu(capacity_window, screening_choice, *screening_display)
+    screening_dropdown.pack(pady=10)
+
+    return
+
+
+### view revenue analytics
+def view_revenue(root):
+    revenue_window = tk.Toplevel(root)
+    revenue_window.geometry("400x300")
+    revenue_window.title("Revenue Analytics")
+
+    # close button
+    close = tk.Button(revenue_window, text = "close", command = revenue_window.destroy)
+    close.pack()
+
+    ### dropdown to choose revenue for day, movie, or theater
+    revenue_choice = tk.StringVar()
+    revenue_choice.set("Day")  # default value
+    revenue_dropdown = tk.OptionMenu(revenue_window, revenue_choice, "Day", "Movie", "Theater")
+    revenue_dropdown.pack(pady = 10)
+
+    return
+
+
+### view average occupancy analytics
+def view_occupancy(root):
+    occupancy_window = tk.Toplevel(root)
+    occupancy_window.geometry("400x300")
+    occupancy_window.title("Occupancy Analytics")
+
+    # close button
+    close = tk.Button(occupancy_window, text = "close", command = occupancy_window.destroy)
+    close.pack()
+
+    ### dropdown to choose occupancy for day, movie, or theater
+    occupancy_choice = tk.StringVar()
+    occupancy_choice.set("Theater")  # default value
+    occupancy_dropdown = tk.OptionMenu(occupancy_window, occupancy_choice, "Day", "Movie", "Theater")
+    occupancy_dropdown.pack(pady = 10)
 
     return
 
@@ -645,7 +754,7 @@ def main():
     canvas = tk.Canvas(root, width = 1200, height = 200, highlightthickness = 0)
     canvas.pack(fill = "both", expand = True)
 
-    bg_image = Image.open("images/bg.jpg").resize((1200, 650)) # fit the screen
+    bg_image = Image.open("images/bg2.png").resize((1200, 650)) # fit the screen
     bg = ImageTk.PhotoImage(bg_image)
     canvas.create_image(0, 0, image = bg, anchor = "nw")
 
@@ -654,7 +763,7 @@ def main():
     canvas.create_rectangle(0, 0, 1200, 120, fill = "#060c28", outline = "")
 
     # "logo"
-    logo_image = Image.open("images/movietixtext.png").resize((300, 100))
+    logo_image = Image.open("images/movietixtext.png").resize((330, 105))
     logo = ImageTk.PhotoImage(logo_image)
     canvas.create_image(27, 7, image = logo, anchor = "nw")
 
