@@ -300,26 +300,96 @@ def get_seat_capacity(screening_id):
 def get_revenue_by_movie():
     conn = get_connection()
     cursor = conn.cursor()
+    ### ticket price is already price * quantity sold in database 
+    cursor.execute(""" SELECT movie_id, SUM(ticket_price) AS total_revenue 
+                       FROM ticket_sales JOIN screening_schedule USING (screening_id) JOIN movies USING (movie_id)  
+                       GROUP BY movie_id""")
 
-    return
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return result
+
+def get_revenue_by_theater():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(""" SELECT theater_id, SUM(ticket_price) AS total_revenue 
+                       FROM ticket_sales JOIN screening_schedule USING (screening_id) JOIN theater USING (theater_id)
+                       GROUP BY theater_id""")
+
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return result
 
 ### revenue grouped by day
 def get_revenue_by_day():
     conn = get_connection()
     cursor = conn.cursor()
 
-    return
+    cursor.execute(""" SELECT date, SUM(ticket_price) AS total_revenue
+                       FROM ticket_sales JOIN screening_schedule USING (screening_id)
+                       GROUP BY date""")
+
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return result
 
 ### average occupancy rate by theater
 def get_occupancy_by_theater():
     conn = get_connection()
     cursor = conn.cursor()
 
-    return
+    cursor.execute(""" SELECT t.theater_id, 
+                   ROUND(AVG((COALESCE(sold.total_sold,0)::decimal / t.max_occupancy) * 100), 2) AS avg_occ
+                   FROM theater t
+                   LEFT JOIN screening_schedule s ON t.theater_id = s.theater_id
+                   LEFT JOIN (SELECT screening_id, SUM(quantity_sold) AS total_sold FROM ticket_sales 
+                   GROUP BY screening_id) sold ON s.screening_id = sold.screening_id
+                   GROUP BY t.theater_id""")
+
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return result
 
 ### average occupancy rate by movie
 def get_occupancy_by_movie():
     conn = get_connection()
     cursor = conn.cursor()
 
+    cursor.execute(""" SELECT m.movie_id, m.title,
+                   ROUND(AVG((COALESCE(sold.total_sold,0)::decimal / t.max_occupancy) * 100), 2) AS avg_occ
+                   FROM movies m
+                   LEFT JOIN screening_schedule s ON m.movie_id = s.movie_id
+                   JOIN theater t ON s.theater_id = t.theater_id
+                   LEFT JOIN (SELECT screening_id, SUM(quantity_sold) AS total_sold FROM ticket_sales 
+                   GROUP BY screening_id) sold ON s.screening_id = sold.screening_id
+                   GROUP BY m.movie_id, m.title""")
+    
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
     return
+
+### average occupancy rate by day
+
+def get_occupancy_by_day():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(""" SELECT s.date, 
+                   ROUND(AVG((COALESCE(sold.total_sold,0)::decimal / t.max_occupancy) * 100), 2) AS avg_occ
+                   FROM screening_schedule s
+                   JOIN theater t ON s.theater_id = t.theater_id
+                   LEFT JOIN (SELECT screening_id, SUM(quantity_sold) AS total_sold FROM ticket_sales 
+                   GROUP BY screening_id) sold ON s.screening_id = sold.screening_id
+                   GROUP BY s.date""")
+
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return result

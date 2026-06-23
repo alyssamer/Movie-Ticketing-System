@@ -712,12 +712,41 @@ def view_revenue(root):
     close = tk.Button(revenue_window, text = "close", command = revenue_window.destroy)
     close.pack()
 
-    ### dropdown to choose revenue for day, movie, or theater
+    ### todo display graphs rather than first value
+
+    ### display revenue based on selection
+    revenue_label = tk.Label(revenue_window, text="", font=("Arial", 12))
+    revenue_label.pack(pady=10)
+
+    def on_revenue_select(*args):
+        selected = revenue_choice.get()
+        
+        if selected == "Day":
+            result = database.get_revenue_by_day()
+            if result:
+                date, revenue = result[0]  # get first result
+                revenue_label.config(text=f"Revenue for {date}: ${revenue:.2f}")
+        
+        elif selected == "Movie":
+            result = database.get_revenue_by_movie()
+            if result:
+                movie_id, revenue = result  # single tuple returned
+                revenue_label.config(text=f"Movie {movie_id} Revenue: ${revenue:.2f}")
+        
+        elif selected == "Theater":
+            result = database.get_revenue_by_theater()
+            if result:
+                theater_id, revenue = result  # single tuple returned
+                revenue_label.config(text=f"Theater {theater_id} Revenue: ${revenue:.2f}")
+
+    ### dropdown to choose revenue type
     revenue_choice = tk.StringVar()
     revenue_choice.set("Day")  # default value
-    revenue_dropdown = tk.OptionMenu(revenue_window, revenue_choice, "Day", "Movie", "Theater")
-    revenue_dropdown.pack(pady = 10)
+    
+    revenue_choice.trace_add("write", on_revenue_select)
 
+    revenue_dropdown = tk.OptionMenu(revenue_window, revenue_choice, "Day", "Movie", "Theater")
+    revenue_dropdown.pack(pady=10)
     return
 
 
